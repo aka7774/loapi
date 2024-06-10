@@ -3,6 +3,8 @@ import requests
 import json
 import base64
 import datetime
+import io
+from PIL import Image
 
 from requests.auth import HTTPBasicAuth
 
@@ -43,6 +45,7 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
         f.write(image)
 
     if r['has_nsfw']:
+        mosaic(image).save(cfga['sd_image_path'])
         return ab.res(2, 'nsfw')
 
     # overwrite. display for OBS
@@ -52,3 +55,21 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
     print(datetime.datetime.now() - dt)
 
     return ab.res(0, 'ok')
+
+def mosaic(image_bin):
+    intensity = 11
+
+    image = Image.open(io.BytesIO(image_bin))
+
+    # 画像サイズをintensity分の1に縮小
+    small = image.resize(
+        (round(image.width / intensity), round(image.height / intensity))
+    )
+
+    # 元画像のサイズに拡大してモザイク処理
+    result = small.resize(
+        (image.width, image.height),
+        resample=Image.NEAREST # 最近傍補間
+    )
+
+    return result
