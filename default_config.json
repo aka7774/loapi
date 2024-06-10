@@ -1,0 +1,25 @@
+{
+	"mata": {
+		"chunk_tsv_dir": "/text/mata",
+		"char_tsv_path": "/text/char.tsv",
+		"scenario_txt_path": "/text/scenario.txt"
+	},
+	"log": {
+		"server": "127.0.0.1:58090",
+		"logfile_format": "%Y-%m-%d",
+		"log_dir": "/logs/llm"
+	},
+	"sdimage": {
+		"sdimage_server": "127.0.0.1:7914",
+		"safetychecker_server": "127.0.0.1:58079",
+		"katanuki_server": "127.0.0.1:58098",
+		"output_dir": "/logs/sdimage",
+		"logfile_format": "%Y-%m-%d-%H-%M-%S",
+		"sd_image_path": "/obs_source/image/sd.webp"
+	},
+	"sbv2": {
+		"server": "127.0.0.1:5000",
+		"cache_dir": "/logs/sbv2",
+		"ttsdic_tsv_path": "/text/ttsdic.tsv"
+	}
+}
