@@ -26,19 +26,25 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
     image = base64.b64decode(r['images'][0])
     files = {'file': image}
 
+    ts = dt.strftime(cfga['logfile_format'])
+
+    # 背景透過前の画像を保存
+    # path = f"{cfga['output_dir']}/{ts}_m.webp"
+    # with open(path, 'wb') as f:
+        # f.write(image)
+
     # safetychecker
     url = f"http://{cfga['safetychecker_server']}/check"
     res = requests.post(url, files=files)
     r = res.json()
 
     # katanuki
-    url = f"http://{cfga['katanuki_server']}/katanuki"
-    res = requests.post(url, files=files)
-    if res.content:
-        image = res.content
+    # url = f"http://{cfga['katanuki_server']}/katanuki"
+    # res = requests.post(url, files=files)
+    # if res.content:
+        # image = res.content
 
     # log
-    ts = dt.strftime(cfga['logfile_format'])
     h = "_h" if r["has_nsfw"] else ""
     path = f"{cfga['output_dir']}/{ts}{h}.webp"
     with open(path, 'wb') as f:

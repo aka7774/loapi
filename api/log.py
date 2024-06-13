@@ -23,6 +23,6 @@ async def api_log(args: dict) -> ab.ApiResponse:
     input = args['input']
     del args['content']
     del args['input']
-    with open(log_path, 'a') as f:
+    with open(log_path, 'a', encoding='utf-8') as f:
         f.write(f"[{dt.strftime('%H:%M:%S')}]\n{input}\n{content}\n{json.dumps(args)}\n====\n")
     return ab.res(0, 'ok.')
