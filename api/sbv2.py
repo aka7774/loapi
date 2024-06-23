@@ -15,8 +15,12 @@ app_name = os.path.splitext(os.path.basename(__file__))[0]
 cfga = cfg[app_name]
 
 def fn_main(args: dict, tts_text):
-    if 'model' not in args:
+    if 'model' not in args or 'speaker' not in args:
         return ''
+    if 'style' not in args:
+        args['style'] = 'Neutral'
+    if 'length' not in args:
+        args['length'] = 1
 
     url = f"http://{cfga['server']}/models/info"
     res = requests.get(url, headers={'Content-Type': 'application/json'})
@@ -24,26 +28,27 @@ def fn_main(args: dict, tts_text):
 
     model_id = None
     for k, v in info.items():
-        if v['id2spk']['0'] == args['model']:
+        if v['id2spk']['0'] == args['speaker'] and f"/{args['model']}/" in v['config_path']:
             model_id = k
             break
     if model_id is None:
         raise ValueError('model not found')
 
     url = f"http://{cfga['server']}/voice"
-    args['text'] = tts_text
-    args['model_id'] = model_id
-    args['model_id'] = model_id
-    args['length'] = 1
-    if 'style' not in args:
-        args['style'] = 'Neutral'
-    body = cache_read(args['text'], args['style'], args['model'])
+    params = {
+        'text': tts_text,
+        'model_id': model_id,
+        'style': args['style'],
+        'length': args['length'],
+    }
+    body = cache_read(tts_text, args['style'], args['length'], args['model'], args['speaker'])
     if not body:
         print(args)
-        res = requests.get(url, params=args, headers={'Content-Type': 'application/json'})
+        print(params)
+        res = requests.get(url, params=params, headers={'Content-Type': 'application/json'})
         body = res.content
 
-        cache_write(args['text'], args['style'], args['model'], body)
+        cache_write(tts_text, args['style'], args['length'], args['model'], args['speaker'], body)
 
     return base64.b64encode(body)
 
@@ -87,15 +92,15 @@ def honorific(name):
     else:
         return name + 'さん'
 
-def cache_read(tts_text, style, model):
-    path = f"{cfga['cache_dir']}/{model}_{style}_{tts_text}.ogg"
+def cache_read(tts_text, style, length, model, speaker):
+    path = f"{cfga['cache_dir']}/{model}_{speaker}_{style}_{length}_{tts_text}.ogg"
     if not os.path.exists(path):
         return None
     with open(path, 'rb') as fp:
         body = fp.read()
     return body
 
-def cache_write(tts_text, style, model, body):
-    path = f"{cfga['cache_dir']}/{model}_{style}_{tts_text}.ogg"
+def cache_write(tts_text, style, length, model, speaker, body):
+    path = f"{cfga['cache_dir']}/{model}_{speaker}_{style}_{length}_{tts_text}.ogg"
     with open(path, 'wb') as fp:
         fp.write(body)
