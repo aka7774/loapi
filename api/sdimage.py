@@ -52,16 +52,11 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
 
     # jsでmosaicできないので妥協
     if r['has_nsfw']:
-        # mosaic(image).save(cfga['sd_image_path'])
         res = {
             'image_b64': base64.b64encode(mosaic(image)).decode('ascii'),
             'has_nsfw': r['has_nsfw'],
         }
         return ab.res(2, 'nsfw', res)
-
-    # # overwrite. display for OBS
-    # with open(cfga['sd_image_path'], 'wb') as f:
-        # f.write(image)
 
     print(datetime.datetime.now() - dt)
 

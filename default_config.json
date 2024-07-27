@@ -20,7 +20,6 @@
 		"katanuki_server": "127.0.0.1:58098",
 		"output_dir": "/logs/sdimage",
 		"logfile_format": "%Y-%m-%d-%H-%M-%S",
-		"sd_image_path": "/obs_source/image/sd.webp",
 		"is_mosaic": true
 	},
 	"sbv2": {
