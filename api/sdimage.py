@@ -50,17 +50,26 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
     with open(path, 'wb') as f:
         f.write(image)
 
+    # jsでmosaicできないので妥協
     if r['has_nsfw']:
-        mosaic(image).save(cfga['sd_image_path'])
-        return ab.res(2, 'nsfw')
+        # mosaic(image).save(cfga['sd_image_path'])
+        res = {
+            'image_b64': base64.b64encode(mosaic(image)).decode('ascii'),
+            'has_nsfw': r['has_nsfw'],
+        }
+        return ab.res(2, 'nsfw', res)
 
-    # overwrite. display for OBS
-    with open(cfga['sd_image_path'], 'wb') as f:
-        f.write(image)
+    # # overwrite. display for OBS
+    # with open(cfga['sd_image_path'], 'wb') as f:
+        # f.write(image)
 
     print(datetime.datetime.now() - dt)
 
-    return ab.res(0, 'ok')
+    res = {
+        'image_b64': base64.b64encode(image).decode('ascii'),
+        'has_nsfw': r['has_nsfw'],
+    }
+    return ab.res(0, 'ok', res)
 
 def mosaic(image_bin):
     intensity = 11
@@ -78,4 +87,8 @@ def mosaic(image_bin):
         resample=Image.NEAREST # 最近傍補間
     )
 
-    return result
+    output = io.BytesIO()
+    result.save(output, format='webp')
+    result_bin = output.getvalue()
+
+    return result_bin

@@ -19,10 +19,12 @@ async def api_log(args: dict) -> ab.ApiResponse:
     
     os.makedirs(cfga['log_dir'], exist_ok=True)
     log_path = f"{cfga['log_dir']}/{dt.strftime(cfga['logfile_format'])}.log"
-    content = args['content']
-    input = args['input']
-    del args['content']
-    del args['input']
     with open(log_path, 'a', encoding='utf-8') as f:
-        f.write(f"[{dt.strftime('%H:%M:%S')}]\n{input}\n{content}\n{json.dumps(args)}\n====\n")
+        f.write(f"[{dt.strftime('%H:%M:%S')}]\n")
+        f.write(f"{args['timestamp']}\n")
+        f.write(f"{args['userid']}\n")
+        f.write(f"{args['name']}\n")
+        f.write(f"{args['comment']}\n")
+        response = '\n'.join(filter(lambda x: x.strip(), map(lambda x: x.strip(), args['response'].split('\n'))))
+        f.write(f"{response}\n")
     return ab.res(0, 'ok.')

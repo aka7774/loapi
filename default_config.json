@@ -5,9 +5,14 @@
 		"scenario_txt_path": "/text/scenario.txt"
 	},
 	"log": {
-		"server": "127.0.0.1:58090",
 		"logfile_format": "%Y-%m-%d",
 		"log_dir": "/logs/llm"
+	},
+	"profile": {
+		"profile_dir": "/user/profiles"
+	},
+	"vector": {
+		"vector_server": "127.0.0.1:58070"
 	},
 	"sdimage": {
 		"sdimage_server": "127.0.0.1:7914",
@@ -20,7 +25,7 @@
 	},
 	"sbv2": {
 		"server": "127.0.0.1:5000",
-		"cache_dir": "/logs/sbv2",
+		"cache_dir": "/logs/tts",
 		"ttsdic_tsv_path": "/text/ttsdic.tsv"
 	}
 }
