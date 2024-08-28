@@ -83,6 +83,7 @@ async def api_scenario() -> ab.ApiResponse:
         return ab.res(1, str(e))
 
 def save_tsv(chunk, tsvs):
+    os.makedirs(cfga['chunk_tsv_dir'], exist_ok=True)
     mata_path = f"{cfga['chunk_tsv_dir']}/{chunk}.tsv"
     with open(mata_path, 'w', encoding='utf-8') as fp:
         for tsv in tsvs:

@@ -19,6 +19,12 @@ cfga = cfg[app_name]
 async def api_sdimage(args: dict) -> ab.ApiResponse:
     dt = datetime.datetime.now()
 
+    # 強制モザイクモード
+    force_mosaic = False
+    if 'mosaic' in args:
+        force_mosaic = True
+        del args['mosaic']
+
     # sdforge
     url = f"http://{cfga['sdimage_server']}/sdapi/v1/txt2img"
     res = requests.post(url, json=args)
@@ -45,13 +51,17 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
         # image = res.content
 
     # log
-    h = "_h" if r["has_nsfw"] else ""
+    h = ""
+    if r["has_nsfw"]:
+        h = "_h"
+    if force_mosaic:
+        h = "_c"
     path = f"{cfga['output_dir']}/{ts}{h}.webp"
     with open(path, 'wb') as f:
         f.write(image)
 
     # jsでmosaicできないので妥協
-    if r['has_nsfw']:
+    if r['has_nsfw'] or force_mosaic:
         res = {
             'image_b64': base64.b64encode(mosaic(image)).decode('ascii'),
             'has_nsfw': r['has_nsfw'],
