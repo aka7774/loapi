@@ -4,6 +4,7 @@ import json
 import base64
 import datetime
 import io
+import math
 from PIL import Image
 
 from requests.auth import HTTPBasicAuth
@@ -20,16 +21,21 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
     dt = datetime.datetime.now()
 
     # 強制モザイクモード
-    force_mosaic = False
-    if 'mosaic' in args:
-        force_mosaic = True
-        del args['mosaic']
+    # force_mosaic = False
+    # if 'force_mosaic' in args:
+        # force_mosaic = True
+        # del args['force_mosaic']
 
-    # sdforge
-    url = f"http://{cfga['sdimage_server']}/sdapi/v1/txt2img"
-    res = requests.post(url, json=args)
-    r = res.json()
-    image = base64.b64decode(r['images'][0])
+    # if 'server' in args:
+        # cfga['sdimage_server'] = args['server']
+        # del args['server']
+
+    # # sdforge
+    # url = f"{cfga['sdimage_server']}/sdapi/v1/txt2img"
+    # res = requests.post(url, json=args)
+    # r = res.json()
+    # image = base64.b64decode(r['images'][0])
+    image = base64.b64decode(args['image_b64'])
     files = {'file': image}
 
     ts = dt.strftime(cfga['logfile_format'])
@@ -54,14 +60,14 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
     h = ""
     if r["has_nsfw"]:
         h = "_h"
-    if force_mosaic:
+    if args['force_mosaic']:
         h = "_c"
     path = f"{cfga['output_dir']}/{ts}{h}.webp"
     with open(path, 'wb') as f:
         f.write(image)
 
     # jsでmosaicできないので妥協
-    if r['has_nsfw'] or force_mosaic:
+    if r['has_nsfw'] or args['force_mosaic']:
         res = {
             'image_b64': base64.b64encode(mosaic(image)).decode('ascii'),
             'has_nsfw': r['has_nsfw'],
@@ -77,9 +83,13 @@ async def api_sdimage(args: dict) -> ab.ApiResponse:
     return ab.res(0, 'ok', res)
 
 def mosaic(image_bin):
-    intensity = 11
-
     image = Image.open(io.BytesIO(image_bin))
+
+    if image.width < image.height:
+        image_min = image.width
+    else:
+        image_min = image.height
+    intensity = math.ceil(image_min / 100)
 
     # 画像サイズをintensity分の1に縮小
     small = image.resize(
